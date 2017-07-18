@@ -50,8 +50,8 @@ export function findAllChildren(node, childType) {
     return _filterComponent(children, childType);
 }
 
-export function findTreeChildren(node, childType) {
-	let children = _getTreeChildren(node);
+export function findTreeChildren(node, childType:Object=null,filter: Object=null) {
+	let children = _getTreeChildren(node, filter);
 
 	return _filterComponent(children, childType);
 }
@@ -97,18 +97,21 @@ function _getAllChildren(node) {
     return children;
 }
 
-function _getTreeChildren(node) {
+function _getTreeChildren(node, filter) {
 	if (node instanceof React.Component) {
         node = node._reactInternalInstance;
     }
-    let tree = {children: []};
+    let tree = {children: [], element: false};
     if (node._renderedComponent) {
         tree.children.push(node._renderedComponent);
         let deeper = _getAllChildren(node._renderedComponent);
-        let subtree = {children: []}
+        let subtree = {children: [], element: false}
         if (deeper && deeper.length) {
-        	subtree.children.push(deeper);
-        	tree.push(subtree);
+        	if (filter && filter(deeper) === true) {
+				subtree.children.push(deeper);
+        		tree.push(subtree);
+        	};
+        	
         }
     } else if (node._renderedChildren) {
         for (let key in node._renderedChildren) {
@@ -116,10 +119,13 @@ function _getTreeChildren(node) {
                 let child = node._renderedChildren[key];
                 tree.children.push(child);
                 let deeper = _getAllChildren(child);
-                let subtree = {children: []}
+                let subtree = {children: [], element: false}
 		        if (deeper && deeper.length) {
-		        	subtree.children.push(deeper);
-		        	tree.push(subtree);
+		        	if (filter && filter(deeper) === true) {
+		        		subtree.children.push(deeper);
+		        		tree.push(subtree);
+		        	}
+		        	
 		        }
             }
         }
