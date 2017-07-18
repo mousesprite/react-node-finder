@@ -50,8 +50,8 @@ export function findAllChildren(node, childType) {
     return _filterComponent(children, childType);
 }
 
-export function findChildren(node, childType) {
-	let children = _getChildren(node);
+export function findTreeChildren(node, childType) {
+	let children = _getTreeChildren(node);
 
 	return _filterComponent(children, childType);
 }
@@ -97,23 +97,34 @@ function _getAllChildren(node) {
     return children;
 }
 
-function _getChildren(node) {
+function _getTreeChildren(node) {
 	if (node instanceof React.Component) {
         node = node._reactInternalInstance;
     }
-
-    let children = [];
-	if (node._renderedComponent) {
-        children.push(node._renderedComponent);
+    let tree = {children: []};
+    if (node._renderedComponent) {
+        tree.children.push(node._renderedComponent);
+        let deeper = _getAllChildren(node._renderedComponent);
+        let subtree = {children: []}
+        if (deeper && deeper.length) {
+        	subtree.children.push(deeper);
+        	tree.push(subtree);
+        }
     } else if (node._renderedChildren) {
         for (let key in node._renderedChildren) {
             if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
                 let child = node._renderedChildren[key];
-                children.push(child);
+                tree.children.push(child);
+                let deeper = _getAllChildren(child);
+                let subtree = {children: []}
+		        if (deeper && deeper.length) {
+		        	subtree.children.push(deeper);
+		        	tree.push(subtree);
+		        }
             }
         }
     }
-    return children;
+    return tree;
 }
 
 // filter the component that we real need.
