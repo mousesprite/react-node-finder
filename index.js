@@ -50,6 +50,12 @@ export function findAllChildren(node, childType) {
     return _filterComponent(children, childType);
 }
 
+export function findChildren(node, childType) {
+	let children = _getChildren(node);
+
+	return _filterComponent(children, childType);
+}
+
 // get parent
 function _getParent(node) {
     if (node instanceof React.Component) {
@@ -85,6 +91,25 @@ function _getAllChildren(node) {
                 children.push(child);
                 let deeper = _getAllChildren(child);
                 (deeper && deeper.length) && (children = children.concat(deeper));
+            }
+        }
+    }
+    return children;
+}
+
+function _getChildren(node) {
+	if (node instanceof React.Component) {
+        node = node._reactInternalInstance;
+    }
+
+    let children = [];
+	if (node._renderedComponent) {
+        children.push(node._renderedComponent);
+    } else if (node._renderedChildren) {
+        for (let key in node._renderedChildren) {
+            if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
+                let child = node._renderedChildren[key];
+                children.push(child);
             }
         }
     }
