@@ -116,11 +116,12 @@ function _getTreeChildren(node) {
 
                 let subnode = {children: [], instance: child};
 
-                vnode.children.push(child);
-
                 let subsubnode = _getTreeChildren(child);
 
                 subnode.children.push(subnode);
+
+                vnode.children.push(subnode);
+                
             }
         }
     }
