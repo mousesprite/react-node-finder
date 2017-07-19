@@ -50,8 +50,10 @@ export function findAllChildren(node, childType) {
     return _filterComponent(children, childType);
 }
 
-export function findTreeChildren(node, childType:Object=null,filter: Object=null) {
-	return _getTreeChildren(node, filter);
+export function findTreeChildren(node,filter: Object=null) {
+	let tree = _getTreeChildren(node, filter);
+	_filterTreeComponent(tree, filter);
+	return tree;
 }
 
 // get parent
@@ -143,6 +145,25 @@ function _filterComponent(nodes, childType) {
         }
     }
     return result;
+}
+
+function _filterTreeComponent(tree, filter) {
+
+	if (!tree) {
+		return null;
+	};
+
+	let newChildren = [];
+	tree.instance = _getValidComponent(tree.instance);
+	tree.children.forEach((c) => {
+		let instance = _getValidComponent(c.instance);
+
+		if (instance && (!filter || filter(instance) === true)) {
+			newChildren.push(instance);
+		};
+		_filterTreeComponent(c);
+	});
+	tree.children = newChildren;
 }
 
 // get valid component and ignore common component, if node is ReactCompositeComponentWrapper then get _instance.
