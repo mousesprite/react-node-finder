@@ -95,39 +95,36 @@ function _getAllChildren(node) {
     return children;
 }
 
-function _getTreeChildren(node, filter) {
+function _getTreeChildren(node) {
 	if (node instanceof React.Component) {
         node = node._reactInternalInstance;
     }
-    let tree = {children: [], element: false};
+    let vnode = {children: [], instance: null}
     if (node._renderedComponent) {
-        tree.children.push(_getValidComponent(node._renderedComponent));
-        let deeper = _getAllChildren(node._renderedComponent);
-        let subtree = {children: [], element: false}
-        if (deeper && deeper.length) {
-        	if (filter && filter(deeper) === true) {
-				subtree.children.push(deeper);
-        		tree.push(subtree);
-        	};
-        	
+
+    	vnode.instance = node._renderedComponent;
+
+        let deeper = _getTreeChildren(node._renderedComponent);
+
+        if (deeper) {
+        	vnode.children.push(deeper);
         }
     } else if (node._renderedChildren) {
         for (let key in node._renderedChildren) {
             if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
                 let child = node._renderedChildren[key];
-                let deeper = _getAllChildren(child);
-                let subtree = {children: [], element: false}
-		        if (deeper && deeper.length) {
-		        	if (filter && filter(deeper) === true) {
-		        		subtree.children.push(_getValidComponent(deeper));
-		        		tree.push(subtree);
-		        	}
-		        	
-		        }
+
+                let subnode = {children: [], instance: child};
+
+                vnode.children.push(child);
+
+                let subsubnode = _getTreeChildren(child);
+
+                subnode.children.push(subnode);
             }
         }
     }
-    return tree;
+    return vnode;
 }
 
 // filter the component that we real need.
