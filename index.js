@@ -101,7 +101,7 @@ function _getTreeChildren(node, filter) {
     }
     let tree = {children: [], element: false};
     if (node._renderedComponent) {
-        tree.children.push(node._renderedComponent);
+        tree.children.push(_getValidComponent(node._renderedComponent));
         let deeper = _getAllChildren(node._renderedComponent);
         let subtree = {children: [], element: false}
         if (deeper && deeper.length) {
@@ -115,12 +115,11 @@ function _getTreeChildren(node, filter) {
         for (let key in node._renderedChildren) {
             if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
                 let child = node._renderedChildren[key];
-                tree.children.push(child);
                 let deeper = _getAllChildren(child);
                 let subtree = {children: [], element: false}
 		        if (deeper && deeper.length) {
 		        	if (filter && filter(deeper) === true) {
-		        		subtree.children.push(deeper);
+		        		subtree.children.push(_getValidComponent(deeper));
 		        		tree.push(subtree);
 		        	}
 		        	
