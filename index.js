@@ -115,6 +115,8 @@ function _getTreeChildren(node, rootNode) {
             if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
                 let child = node._renderedChildren[key];
 
+                console.log('type: ' + (typeof child));
+
                 let subnode = {children: [], currentInstance: child};
 
                 let subsubnode = _getTreeChildren(child, subnode);
@@ -124,7 +126,7 @@ function _getTreeChildren(node, rootNode) {
                 };
 
                 rootNode.children.push(subnode);
-            
+            	
             }
         }
     }
