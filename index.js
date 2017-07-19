@@ -52,7 +52,7 @@ export function findAllChildren(node, childType) {
 
 export function findTreeChildren(node,filter: Object=null) {
 	let tree = _getTreeChildren(node, filter);
-	_filterTreeComponent(tree, filter);
+	//_filterTreeComponent(tree, filter);
 	return tree;
 }
 
