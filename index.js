@@ -121,7 +121,9 @@ function _getTreeChildren(node, rootNode) {
 
                 let subsubnode = _getTreeChildren(child, subnode);
 
-                console.log('----->>>>> ' + JSON.stringify(rootNode))
+                if (!rootNode.children) {
+                	rootNode.children = [];
+                };
 
                 rootNode.children.push(subnode);
             
