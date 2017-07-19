@@ -50,9 +50,9 @@ export function findAllChildren(node, childType) {
     return _filterComponent(children, childType);
 }
 
-export function findTreeChildren(node,filter: Object=null) {
-	let tree = _getTreeChildren(node, filter);
-	//_filterTreeComponent(tree, filter);
+export function findTreeChildren(node,filter) {
+	let tree = _getTreeChildren(node);
+	_filterTreeComponent(tree, filter);
 	return tree;
 }
 
