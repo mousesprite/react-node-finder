@@ -101,14 +101,12 @@ function _getTreeChildren(node, rootNode) {
 	if (node instanceof React.Component) {
         node = node._reactInternalInstance;
     }
-    let vnode = {children: [], instance: null}
+    let vnode = {children: [], currentInstance: null}
 
     if (!rootNode) {
     	rootNode = vnode;
     };
     if (node._renderedComponent) {
-
-    	rootNode.instance = node._renderedComponent;
 
         _getTreeChildren(node._renderedComponent, rootNode);
 
@@ -117,7 +115,7 @@ function _getTreeChildren(node, rootNode) {
             if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
                 let child = node._renderedChildren[key];
 
-                let subnode = {children: [], instance: child};
+                let subnode = {children: [], currentInstance: child};
 
                 let subsubnode = _getTreeChildren(child, subnode);
 
@@ -158,9 +156,9 @@ function _filterTreeComponent(tree, filter) {
 	};
 
 	let newChildren = [];
-	tree.instance = _getValidComponent(tree.instance);
+	tree.currentInstance = _getValidComponent(tree.currentInstance);
 	tree.children.forEach((c) => {
-		let instance = _getValidComponent(c.instance);
+		let instance = _getValidComponent(c.currentInstance);
 
 		if (instance && (!filter || filter(instance) === true)) {
 			newChildren.push(instance);
