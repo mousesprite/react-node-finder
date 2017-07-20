@@ -51,8 +51,7 @@ export function findAllChildren(node, childType) {
 }
 
 export function findTreeChildren(node,filter) {
-	let tree = _getTreeChildren(node);
-	_filterTreeComponent(tree, filter);
+	let tree = _getTreeChildren(node, null, filter);
 	return tree;
 }
 
@@ -97,36 +96,50 @@ function _getAllChildren(node) {
     return children;
 }
 
-function _getTreeChildren(node, rootNode) {
+function _getTreeChildren(node, rootNode, filterFunction) {
 	if (node instanceof React.Component) {
         node = node._reactInternalInstance;
     }
-    let vnode = {children: [], currentInstance: null}
+    let vnode = {children: []}
 
     if (!rootNode) {
     	rootNode = vnode;
     };
     if (node._renderedComponent) {
 
-        _getTreeChildren(node._renderedComponent, rootNode);
+        let comInstance = _getFilteredValidComponent(node._renderedComponent, filterFunction);
+
+        let sub = {children: []}
+        if (comInstance) {
+
+            sub.currentInstance = comInstance;
+
+            rootNode.children.push(sub);
+
+            _getTreeChildren(node._renderedComponent, sub, filterFunction);
+        } else {
+            _getTreeChildren(node._renderedComponent, rootNode, filterFunction);
+        }
 
     } else if (node._renderedChildren) {
+
         for (let key in node._renderedChildren) {
             if (node._renderedChildren.hasOwnProperty(key) && key.indexOf('.') == 0) {
                 let child = node._renderedChildren[key];
 
-                console.log('type: ' + (typeof child));
+                let inst = _getFilteredValidComponent(child, filterFunction);
+                let subnode = {children: []};
+                if (inst) {
 
-                let subnode = {children: [], currentInstance: child};
+                    _getTreeChildren(child, subnode, filterFunction);
 
-                let subsubnode = _getTreeChildren(child, subnode);
+                    subnode.currentInstance = inst;
 
-                if (!rootNode.children) {
-                	rootNode.children = [];
-                };
+                    rootNode.children.push(subnode);
 
-                rootNode.children.push(subnode);
-            	
+                } else {
+                    _getTreeChildren(child, rootNode, filterFunction);
+                }
             }
         }
     }
@@ -151,28 +164,22 @@ function _filterComponent(nodes, childType) {
     return result;
 }
 
-function _filterTreeComponent(tree, filter) {
+function _getFilteredValidComponent(component, filterFunction) {
 
-	if (!tree) {
+	if (!component) {
 		return null;
 	};
 
-	let newChildren = [];
-	tree.currentInstance = _getValidComponent(tree.currentInstance);
-	tree.children.forEach((c) => {
-		let instance = _getValidComponent(c.currentInstance);
-
-		if (instance && (!filter || filter(instance) === true)) {
-			newChildren.push(instance);
-		};
-		_filterTreeComponent(c);
-	});
-	tree.children = newChildren;
+	let  instance = _getValidComponent(component);
+    if (instance && (!filterFunction || filterFunction(instance) === true)) {
+        return instance;
+    }
+    return null;
 }
 
 // get valid component and ignore common component, if node is ReactCompositeComponentWrapper then get _instance.
 function _getValidComponent(node) {
-    if (node && node.constructor.name == 'ReactCompositeComponentWrapper') {
+    if (node && (node.constructor.name == 'ReactCompositeComponentWrapper' || node.__proto__.constructor.name == 'ReactCompositeComponentWrapper')) {
         node = node._instance;
     }
     if (node && IGNORED_COMPONENTS.indexOf(node.constructor.name) >= 0) {
